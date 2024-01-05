@@ -1,18 +1,22 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.qpb8023.cairoplugin</id>
-    <name>cairo-plugin Template</name>
-    <vendor>qpb8023</vendor>
+    <id>Cairo_Analyzer_Test</id>
+    <name>Cairo Analyzer test</name>
+    <vendor>0.0.1</vendor>
 
+    <depends>com.intellij.modules.ultimate</depends>
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+<!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.qpb8023.cairoplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <!-- LSP -->
+        <platform.lsp.serverSupportProvider implementation="FooLspServerSupportProvider"/>
+
+<!--        <toolWindow id="YourToolWindowId" anchor="bottom" secondary="true" factoryClass="YourToolWindowFactory"/>-->
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.qpb8023.cairoplugin.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
+<!--    <applicationListeners>-->
+<!--        <listener class="org.jetbrains.plugins.template.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>-->
+<!--    </applicationListeners>-->
 </idea-plugin>
