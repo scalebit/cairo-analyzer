@@ -6,8 +6,9 @@
 
     <depends>com.intellij.modules.ultimate</depends>
     <depends>com.intellij.modules.platform</depends>
+    <description> this is a test plugin for cairo in intellij </description>
 
-<!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
+    <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- LSP -->
