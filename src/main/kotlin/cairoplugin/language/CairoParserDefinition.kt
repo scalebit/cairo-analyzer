@@ -6,6 +6,8 @@ import com.intellij.lang.ASTNode
 import com.intellij.lang.FileASTNode
 import com.intellij.lang.Language
 import com.intellij.lang.ParserDefinition
+import com.intellij.lang.PsiParser
+import com.intellij.lexer.Lexer
 import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
@@ -22,7 +24,7 @@ class CairoParserDefinition : ParserDefinition {
     }
 
     @NotNull
-    override fun createLexer(project: Project): CairoLexerAdapter {
+    override fun createLexer(project: Project): Lexer {
         return CairoLexerAdapter()
     }
 
@@ -37,7 +39,7 @@ class CairoParserDefinition : ParserDefinition {
     }
 
     @NotNull
-    override fun createParser(project: Project): CairoParser {
+    override fun createParser(project: Project): PsiParser {
         return CairoParser()
     }
 

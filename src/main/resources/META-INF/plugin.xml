@@ -28,11 +28,12 @@
                 language="Cairo"
                 implementationClass="cairoplugin.language.CairoParserDefinition"/>
 
-<!--        <lang.syntaxHighlighterFactory-->
-<!--                language="Cairo"-->
-<!--                implementationClass="cairoplugin.language.CairoSyntaxHighlighterFactory"/>-->
-
         <!-- high light -->
+        <lang.syntaxHighlighterFactory
+                language="Cairo"
+                implementationClass="cairoplugin.language.CairoSyntaxHighlighterFactory"/>
+
+
 
 
 <!--        <toolWindow id="YourToolWindowId" anchor="bottom" secondary="true" factoryClass="YourToolWindowFactory"/>-->
