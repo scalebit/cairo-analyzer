@@ -1,0 +1,21 @@
+
+{
+  parserClass="cairoplugin.language.parser.CairoParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Cairo"
+  psiImplClassSuffix="Impl"
+  psiPackage="cairoplugin.language.psi"
+  psiImplPackage="cairoplugin.language.psi.impl"
+
+  elementTypeHolderClass="cairoplugin.language.psi.CairoTypes"
+  elementTypeClass="cairoplugin.language.psi.CairoElementType"
+  tokenTypeClass="cairoplugin.language.psi.CairoTokenType"
+}
+
+CairoFile ::= item_*
+
+private item_ ::= (property|COMMENT|CRLF)
+
+property ::= (KEY? SEPARATOR VALUE?) | KEY

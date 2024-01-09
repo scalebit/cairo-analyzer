@@ -6,6 +6,7 @@
 
     <depends>com.intellij.modules.ultimate</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
     <description> this is a test plugin for cairo in intellij </description>
 
     <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
@@ -14,10 +15,27 @@
         <!-- LSP -->
         <platform.lsp.serverSupportProvider implementation="FooLspServerSupportProvider"/>
 
+        <!-- fileType -->
+        <fileType
+                name="Cairo File"
+                implementationClass="cairoplugin.language.CairoFileType"
+                fieldName="INSTANCE"
+                language="Cairo"
+                extensions="cairo"/>
+
+        <!-- Parser -->
+        <lang.parserDefinition
+                language="Cairo"
+                implementationClass="cairoplugin.language.CairoParserDefinition"/>
+
+<!--        <lang.syntaxHighlighterFactory-->
+<!--                language="Cairo"-->
+<!--                implementationClass="cairoplugin.language.CairoSyntaxHighlighterFactory"/>-->
+
+        <!-- high light -->
+
+
 <!--        <toolWindow id="YourToolWindowId" anchor="bottom" secondary="true" factoryClass="YourToolWindowFactory"/>-->
     </extensions>
 
-<!--    <applicationListeners>-->
-<!--        <listener class="org.jetbrains.plugins.template.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>-->
-<!--    </applicationListeners>-->
 </idea-plugin>
