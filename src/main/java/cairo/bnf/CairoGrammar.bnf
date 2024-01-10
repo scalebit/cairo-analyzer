@@ -1,0 +1,501 @@
+{
+	parserClass="cairo.CairoParser"
+
+	psiClassPrefix="Cairo"
+	psiImplClassSuffix="Impl"
+	psiPackage="cairo.psi"
+	psiImplPackage="cairo.psi.impl"
+
+	elementTypeHolderClass="cairo.psi.CairoTokens"
+	elementTypeClass="cairo.psi.CairoTokenType"
+	tokenTypeClass="cairo.psi.CairoTokenType"
+
+	tokenTypeClass("keyword")="cairo.psi.CairoKeywordTokenType"
+
+	extends(".*_item")=item
+	extends("expr_.*")=expr
+	extends("block_.*")=expr_block
+	extends("type_.*")=type
+	extends("enum_variant_.*")=enum_variant
+	extends(".*_match_pattern")=match_pattern
+	extends("let_.*_bind")=let_bind
+	consumeTokenMethod("expr_.*|expr")="consumeTokenFast"
+
+	tokens = [
+		KW_AS = "as"
+		KW_BREAK = "break"
+		KW_CRATE = "crate"
+		KW_ELSE = "else"
+		KW_ENUM = "enum"
+		KW_EXTERN = "extern"
+		KW_FALSE = "false"
+		KW_FN = "fn"
+		KW_FOR = "for"
+		KW_IF = "if"
+		KW_IMPL = "impl"
+		KW_IN = "in"
+		KW_LET = "let"
+		KW_CONST = "const"
+		KW_LOOP = "loop"
+		KW_MATCH = "match"
+		KW_MOD = "mod"
+		KW_MUT = "mut"
+		KW_PRIV = "priv"
+		KW_PROC = "proc"
+		KW_MOVE = "move"
+		KW_PUB = "pub"
+		KW_REF = "ref"
+		KW_RETURN = "return"
+		KW_SELF = "self"
+		KW_STATIC = "static"
+		KW_STRUCT = "struct"
+		KW_SUPER = "super"
+		KW_TRUE = "true"
+		KW_TRAIT = "trait"
+		KW_TYPE = "type"
+		KW_UNSAFE = "unsafe"
+		KW_USE = "use"
+		KW_WHILE = "while"
+		KW_CONTINUE = "continue"
+		KW_BOX = "box"
+		KW_WHERE = "where"
+		KW_MACRO_RULES = "macro_rules!"
+
+		FAT_ARROW = "=>"
+		THIN_ARROW = "->"
+		DOT = "."
+
+		BITWISE_AND = "&"
+		BITWISE_OR = "|"
+		BITWISE_XOR = "^"
+
+		TRIPLE_DOT = "..."
+		DOUBLE_DOT = ".."
+		DOUBLE_COLON = "::"
+		COLON = ":"
+
+		PLUS = "+"
+		MINUS = "-"
+		MULTIPLY = "*"
+		DIVIDE = "/"
+		REMAINDER = "%"
+
+		ASSIGN_LEFT_SHIFT = "<<="
+		ASSIGN_RIGHT_SHIFT = ">>="
+		EQUAL = "=="
+		ASSIGN = "="
+		NOT_EQUAL = "!="
+		LESS_THAN_OR_EQUAL = "<="
+		LESS_THAN = "<"
+		GREATER_THAN_OR_EQUAL = ">="
+		GREATER_THAN = ">"
+
+		NOT = "!"
+		BOX = "~"
+		AT = "@"
+		SINGLE_QUOTE = "'"
+		DOLLAR = "$"
+
+		HASH = "#"
+		OPEN_SQUARE_BRACKET = "["
+		CLOSE_SQUARE_BRACKET = "]"
+		OPEN_PAREN = "("
+		CLOSE_PAREN = ")"
+		OPEN_BRACE = "{"
+		CLOSE_BRACE = "}"
+		COMMA = ","
+		SEMICOLON = ";"
+	]
+}
+
+file ::= mod_contents
+
+item ::= mod_item
+	| fn_item
+	| type_item
+	| struct_item
+	| enum_item
+	| static_item
+	| const_item
+	| trait_item
+	| impl_item
+	| extern_item {extends="cairo.psi.mixin.item.CairoItemMixin" implements="com.intellij.psi.PsiNamedElement"}
+
+itemName ::= IDENTIFIER
+
+// AGGREGATE TYPES
+private numeric_literal ::= '-'? (BIN_LIT | OCT_LIT | HEX_LIT | DEC_LIT)
+private string_literal ::= STRING_LIT | RAW_STRING_LIT | CHAR_LIT
+private literal ::= string_literal | numeric_literal | 'true' | 'false' | 'self' | unit
+private unit ::= ref? '(' ')'
+private comment ::= (BLOCK_COMMENT|BLOCK_DOC_COMMENT|LINE_COMMENT|LINE_DOC_COMMENT)
+
+// Generic recovery predicates
+private not_open_brace ::= !'{'
+private not_close_brace ::= !'}'
+private not_semicolon ::= !';'
+private not_semicolon_or_open_brace ::= !('{' | ';')
+private not_open_brace_or_where ::= !('{' | 'where')
+
+visibility ::= 'priv' | 'pub'
+
+// EXPRESSIONS! - this is based heavily https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md
+// These are in increasing order of precedence  (opposite of cairo manual)
+expr ::= expr_macro
+	| builtin_expression_group
+	| assign_group
+	| expr_logical_or
+	| expr_logical_and
+	| equals_group
+	| comparison_group
+	| expr_bitwise_or
+	| expr_bitwise_xor
+	| expr_bitwise_and
+	| shift_group
+	| add_group
+	| expr_as
+	| mul_group
+	| unary_group
+	| expr_call
+	| expr_closure
+	| expr_index
+	| expr_field
+	| primary_group
+
+expr_as ::= expr 'as' type
+
+expr_bitwise_and ::= expr '&' expr
+expr_bitwise_xor ::= expr '^' expr
+expr_bitwise_or ::= expr '|' !'|' expr
+
+// Need to break out of this expression parser before recursing here, otherwise the priorities will be off
+expr_index ::= expr '[' index_expr ']'
+index_expr ::= expr '..'?
+expr_field ::= expr '.' expr
+
+private assign_group ::= expr_assign
+	| expr_assign_increment
+	| expr_assign_decrement
+	| expr_assign_multiply
+	| expr_assign_divide
+	| expr_assign_modulo
+	| expr_assign_and
+	| expr_assign_or
+	| expr_assign_not
+	| expr_assign_left_shift
+	| expr_assign_right_shift
+	
+expr_assign ::= expr '=' expr {rightAssociative=true}
+expr_assign_increment ::= expr '+' '=' expr {rightAssociative=true}
+expr_assign_decrement ::= expr '-' '=' expr {rightAssociative=true}
+expr_assign_multiply ::= expr '*' '=' expr {rightAssociative=true}
+expr_assign_divide ::= expr '/' '=' expr {rightAssociative=true}
+expr_assign_modulo ::= expr '%' '=' expr {rightAssociative=true}
+expr_assign_and ::= expr '&' '=' expr {rightAssociative=true}
+expr_assign_or ::= expr '|' '=' expr {rightAssociative=true}
+expr_assign_not ::= expr '^' '=' expr {rightAssociative=true}
+expr_assign_left_shift ::= expr '<<=' expr {rightAssociative=true}
+expr_assign_right_shift ::= expr '>>=' expr {rightAssociative=true}
+
+private mul_group ::= expr_multiply | expr_divide | expr_modulo
+expr_divide ::= expr '/' expr
+expr_multiply ::= expr '*' expr
+expr_modulo ::= expr '%' expr
+
+// Private rules to define operators with the same priority
+private unary_group ::= expr_unary_plus | expr_unary_minus | expr_unary_not | expr_deref | expr_box | expr_borrow
+expr_unary_minus ::= '-' expr
+expr_unary_plus ::= '+' expr
+expr_unary_not ::= '!' expr
+expr_deref ::= '*' expr
+expr_box ::= 'box' expr
+expr_borrow ::= '&' lifetime? 'mut'? expr
+
+
+private add_group ::= expr_plus | expr_minus
+expr_plus ::= expr '+' expr
+expr_minus ::= expr '-' expr
+
+private shift_group ::= expr_left_shift | expr_right_shift
+expr_left_shift ::= expr '<' '<' expr
+expr_right_shift ::= expr '>' '>' expr
+
+private comparison_group ::= expr_greater_than | expr_less_than | expr_greater_or_equal | expr_less_or_equal
+expr_less_or_equal ::= expr '<=' expr
+expr_less_than ::= expr '<' !'<' expr
+expr_greater_or_equal ::= expr '>=' expr
+expr_greater_than ::= expr '>'  !'>' expr
+
+private equals_group ::= expr_equal_to | expr_not_equal_to
+expr_not_equal_to ::= expr '!=' expr
+expr_equal_to ::= expr '==' expr
+
+expr_logical_and ::= expr '&' '&' expr
+expr_logical_or ::= expr '|' '|' expr
+
+expr_closure ::= 'move'? closure_expr_args closure_body
+closure_expr_args ::= '|' let_args '|'
+
+closure_body ::= ['->' type] (statement | expr | statement_block)
+
+private primary_group ::= expr_block | expr_paren | expr_vector | expr_struct_initializer | expr_path | expr_identifier | expr_value
+
+// These constructs don't need a trailing semicolon unless found as part of an expression
+expr_block ::= statement_block | block_for | block_if | block_while | block_loop | block_unsafe | block_match
+block_for ::= 'for' let_bind 'in' expr statement_block
+block_while ::= 'while' if_let? expr statement_block
+block_loop ::= [lifetime ':'] 'loop' statement_block
+block_unsafe ::= 'unsafe' statement_block
+block_if ::= 'if' if_let? expr statement_block if_tail
+if_tail ::= ('else' 'if' if_let? expr statement_block)* ['else' statement_block]
+private if_let ::= 'let' let_bind '=' {pin=1}
+
+expr_paren ::= '(' expr expr_tuple_body? ')'
+expr_tuple_body ::= ',' [expr (',' expr)*]
+expr_value ::= literal
+expr_identifier ::= IDENTIFIER
+expr_struct_initializer ::= expr '{' struct_initializer_list [',' struct_default?] "}"
+struct_default ::= '..' expr
+struct_initializer_list ::= IDENTIFIER ':' expr (',' IDENTIFIER ':' expr)*
+
+expr_vector ::= '[' [(comment | attribute)* expr (',' (comment | attribute)* expr)*] (comment | attribute)* [';' expr] ','?(comment | attribute)*']'
+
+
+// MATCH
+block_match ::= 'match' expr match_block {pin=1}
+match_block ::= '{' match_body '}'
+match_body ::= match_arm* {recoverWhile="not_close_brace"}
+match_arm ::= match_filter ('|' match_filter)* '=>' (statement_block | statement | expr) ','?
+match_filter ::= match_pattern match_if?
+match_if ::= 'if' expr
+match_pattern ::= tuple_match_pattern | struct_match_pattern | vector_match_pattern | range_match_pattern | basic_match_pattern
+match_label ::= match_identifier '@'
+
+tuple_match_pattern ::= match_label? 'box'? '&'? type_path? '(' tuple_match_pattern_argument (',' tuple_match_pattern_argument)* ')'
+private tuple_match_pattern_argument ::= match_pattern | '..'
+
+vector_match_pattern ::= 'box'? 'ref'? '&'? '[' [vector_match_identifier (',' vector_match_identifier)* ] ']'
+private vector_match_identifier ::= IDENTIFIER? '..' | match_pattern
+
+struct_match_pattern ::= 'box'? 'ref'? type_path '{' (struct_match_pattern_argument (',' struct_match_pattern_argument)* [',' '..'] | '..') '}'
+private struct_match_pattern_argument ::= match_identifier [':' match_pattern]
+
+range_match_pattern ::= match_label? (literal | match_identifier) '...' (literal | match_identifier)
+
+basic_match_pattern ::= match_label? ('&'? 'box'? literal | type | match_identifier )
+match_identifier ::= 'box'? ref? 'ref'? 'mut'? IDENTIFIER
+
+
+// CALL
+expr_call ::= expr '(' call_params ')'
+call_params ::= expr? (',' expr)* ','?
+
+expr_macro ::= IDENTIFIER '!' (macro_paren | macro_brace | macro_bracket)
+macro_paren ::= '(' macro_body ')'
+macro_brace ::= '{' macro_body '}'
+macro_bracket ::= '[' macro_body ']'
+macro_body ::= macro_body_internal
+private macro_body_internal ::= (macro_paren | macro_brace | macro_bracket | macro_wildcard)*
+
+// All tokens except [] () and {}
+private macro_wildcard ::= KW_AS | KW_BREAK | KW_CRATE | KW_ELSE | KW_ENUM | KW_EXTERN | KW_FALSE | KW_FN | KW_FOR
+	| KW_IF | KW_IMPL | KW_IN | KW_LET | KW_LOOP | KW_MATCH | KW_MOD | KW_MUT | KW_PRIV | KW_PROC | KW_PUB | KW_REF
+	| KW_RETURN | KW_SELF | KW_STATIC | KW_STRUCT | KW_SUPER | KW_TRUE | KW_TRAIT | KW_TYPE | KW_UNSAFE | KW_USE
+	| KW_WHILE | KW_CONTINUE | KW_BOX | LINE_DOC_COMMENT | LINE_COMMENT | CHAR_LIT | STRING_LIT | SEMICOLON
+	| BIN_LIT | OCT_LIT | HEX_LIT | DEC_LIT | IDENTIFIER | FAT_ARROW | THIN_ARROW | DOT | BITWISE_AND | BITWISE_OR
+	| BITWISE_XOR | DOUBLE_COLON | COLON | PLUS | MINUS | MULTIPLY | DIVIDE | REMAINDER | EQUAL | ASSIGN | NOT_EQUAL
+	| LESS_THAN_OR_EQUAL | LESS_THAN | GREATER_THAN_OR_EQUAL | GREATER_THAN | NOT | BOX | AT | SINGLE_QUOTE | DOLLAR
+	| HASH | COMMA | BAD_CHARACTER | RAW_STRING_LIT | ASSIGN_RIGHT_SHIFT | ASSIGN_LEFT_SHIFT | DOUBLE_DOT | TRIPLE_DOT
+	| BLOCK_COMMENT | BLOCK_DOC_COMMENT
+
+// Builtin expressions
+private builtin_expression_group ::= expr_continue | expr_break
+expr_continue ::= 'continue' lifetime?
+expr_break ::= 'break' lifetime?
+
+
+// TYPES
+expr_path ::= '::'? ('self' '::' | 'super' '::')* IDENTIFIER ('::' (IDENTIFIER | generic))*
+type ::= type_basic | type_vector | type_tuple | type_function | type_unit
+private type_sum ::= type_bounded | type
+
+type_basic ::= just_type_basic
+type_bounded ::= just_type_basic '+' bounds
+private just_type_basic ::= type_modifiers type_path '::'? [generic | closure_sugar]
+
+type_vector ::= type_modifiers '[' type_sum [';' expr] ']'
+type_tuple ::= type_modifiers '(' tupled_type (',' tupled_type)* ','? ')'
+private tupled_type ::= 'ref'? type_sum
+type_function ::= ref? 'unsafe'? ['extern' STRING_LIT?] 'fn' trait_bounds? fn_prototype_args ['->' return_type]
+fn_prototype_args ::= '(' prototype_args ')'
+type_unit ::= ref? '*'? 'mut'? '(' ')'
+
+private type_modifiers ::= ( ref | lifetime | '*' 'const' | 'mut' | '*' 'mut' | 'box')*
+private type_path ::= '::'? ('self' '::' | 'super' '::')* IDENTIFIER ('::' IDENTIFIER)*
+ref ::= '&'+ lifetime?
+lifetime ::= "'" (IDENTIFIER | 'static')
+
+
+// GENERIC PARAM LIST eg function<A>(...)
+generic_params ::= '<' generic_param (',' generic_param)* '>' {pin=1}
+private generic_param ::= (lifetime [':' lifetime]) | IDENTIFIER  [(':' | '=') bounds]
+private bounds ::= a_bound ('+' a_bound)*
+private a_bound ::= type | lifetime
+
+
+// GENERIC TYPES eg Option<Foo>
+generic ::= '<' (generic_without_lifetime | generic_with_lifetime) '>' {pin=1}
+private generic_with_lifetime ::= lifetime (',' lifetime)* (',' type_param)*
+private generic_without_lifetime ::= type_param (',' type_param)*
+private type_param ::= [IDENTIFIER '='] type_sum
+
+// CLOSURE SUGAR eg FnMut(i32, char) -> String
+closure_sugar ::= '(' [type (',' type)*] ')' ['->' return_type] {pin=1}
+
+// WHERE CLAUSES
+where_clause ::= 'where' where_bound (',' where_bound)* ','? {pin=1}
+where_bound ::= type ':' bounds '+'?
+
+
+// USE
+use ::= use_internal ';'
+private use_internal ::= visibility? 'use' (use_glob | use_part ('::' use_part)* ('::' use_glob | '=' expr_path)? ('as' IDENTIFIER)?) {pin=2 recoverWhile="not_semicolon"}
+private use_glob ::= ('*' | use_group)
+private use_part ::= (IDENTIFIER | 'super' | 'self')
+use_group ::= '{' (IDENTIFIER | 'self') ( ',' (IDENTIFIER | 'self') )* ','? '}';
+
+
+// FUNCTIONS
+fn_item ::= (comment | attribute)* fn_declaration statement_block {mixin="cairo.psi.mixin.item.CairoFnItemMixin"}
+fn_declaration ::= visibility? 'unsafe'? 'fn' itemName generic_params? fn_args ['->' return_type] where_clause? {pin=3 recoverWhile="function_recover"}
+fn_args ::= '(' let_args ')'
+private return_type ::= type | '!'
+private function_recover ::= !('{'|';')
+
+statement_block ::= '{' statement_block_internal '}' {pin=1}
+private statement_block_internal ::= (statement)* {recoverWhile="not_close_brace"}
+
+private statement ::= expr ';'?
+	| use
+	| let
+	| item
+	| macro_rules
+	| return_statement
+	| empty_statement
+	| comment
+	| attribute
+
+return_statement ::= 'return' expr? ';'?
+empty_statement ::= ';'
+
+
+// STRUCTS
+struct_item ::= visibility? 'struct' itemName generic_params? struct_body_with_where {mixin="cairo.psi.mixin.item.CairoStructItemMixin"}
+private struct_body_with_where ::=
+	struct_body_tuple where_clause? ';' |
+	where_clause? (';' | struct_body_block)
+
+struct_body_block ::= '{' [struct_property (',' struct_property)* ','? (comment | attribute)*] '}' {pin=1}
+struct_property ::= (comment | attribute)* visibility? let_variable_bind {recoverWhile="struct_recover" extends="cairo.psi.mixin.struct.CairoStructPropertyMixin" implements="com.intellij.psi.PsiNamedElement"}
+struct_recover ::= !('}' | ',')
+
+struct_body_tuple ::= '(' struct_tuple_property (',' struct_tuple_property)* ')' {pin=1}
+struct_tuple_property ::= visibility? type_sum;
+
+
+// ENUMS
+enum_item ::= visibility? 'enum' itemName generic_params? '{' enum_body '}' {pin=2 mixin="cairo.psi.mixin.item.CairoEnumItemMixin"}
+enum_body ::= [ enum_variant (',' enum_variant)* ','? (comment | attribute)* ]
+enum_variant ::= enum_variant_nullary | enum_variant_tuple | enum_variant_struct
+enum_variant_nullary ::= (comment | attribute)* IDENTIFIER !('(' | '{') ['=' expr]
+enum_variant_tuple ::= (comment | attribute)* IDENTIFIER '(' type (',' type)* ')'
+enum_variant_struct ::= (comment | attribute)* IDENTIFIER '{' enum_variant_struct_member (',' enum_variant_struct_member)* ','? '}'
+enum_variant_struct_member ::= visibility? IDENTIFIER ':' type
+
+
+// IMPL
+impl_item ::= 'impl' generic_params? type impl_for? where_clause? impl_block {pin=1 mixin="cairo.psi.mixin.item.CairoImplItemMixin"}
+impl_block ::= '{' impl_body '}'
+impl_for ::= 'for' type
+impl_body ::= impl_subitem* {recoverWhile="not_close_brace"}
+private impl_subitem ::= fn_item | impl_assoc_type;
+impl_assoc_type ::= 'type' itemName '=' type ';' {pin=1}
+
+
+// TRAITS
+trait_item ::= visibility? 'trait' generic_params? itemName generic_params? trait_implements? where_clause? trait_block {pin=2}
+trait_block ::= '{' trait_subitem* '}'
+trait_implements ::= ':' type ('+' type)* {recoverWhile="not_open_brace_or_where"}
+private trait_subitem ::= (trait_function_declaration (';' | statement_block)) | trait_assoc_type | comment | attribute
+trait_function_declaration ::= (comment | attribute)* visibility? 'unsafe'? 'fn' IDENTIFIER generic_params? '(' prototype_args ','? '...'? ')' ['->' return_type] {pin=4 recoverWhile="not_semicolon_or_open_brace" }
+trait_assoc_type ::= 'type' itemName [':' bounds] where_clause? ['=' type] ';' {pin=1}
+
+trait_bounds ::= ':' (IDENTIFIER | region_bound)?
+region_bound ::= "'" 'static' //?
+
+
+// EXTERNALS
+extern_item ::= visibility? 'unsafe'? 'extern' (extern_crate ';' | extern_block '}' | extern_function)
+extern_block ::= STRING_LIT? '{' (attribute | extern_variable ';' | trait_function_declaration ';')* {pin=2 recoverWhile="not_close_brace"}
+extern_variable ::= visibility? 'static'? 'ref'? ref? 'mut'? IDENTIFIER [':' type]
+extern_crate ::= 'crate' [STRING_LIT 'as'] IDENTIFIER {pin=1 recoverWhile="not_semicolon"}
+extern_function ::= STRING_LIT? fn_item
+
+
+// LET
+let ::= 'let' let_bind ['=' (expr | statement_block)] ';'?
+
+// let args are used by function and closure implementations and of course let. A single param here is considered a type
+let_args ::= [ let_bind ( ',' let_bind)* ','? ]
+let_bind ::= let_tuple_bind | let_struct_bind | let_variable_bind | let_unit_bind | let_self_arg
+let_variable_bind ::= variable_signature [':' type_sum]
+let_tuple_bind ::= ref* type_path? '(' let_bind (',' let_bind)* ','? ')' [':' type_sum]
+let_struct_bind ::= type_path '{' struct_bind_member (',' struct_bind_member )* ','? '..'? ','? '}' [':' type]
+let_unit_bind ::= '(' ')'
+let_self_arg ::= ref? 'mut'? 'self'
+
+// Prototype args are used by closure definitions, externs and trait declarations of functions. A single param here is
+// considered an identifier
+prototype_args ::= [ prototype_arg ( ',' prototype_arg)* ]
+prototype_arg ::= prototype_tuple_arg | prototype_struct_arg | prototype_variable_arg | prototype_self_arg
+prototype_variable_arg ::= variable_signature ':' type | type
+prototype_tuple_arg ::= ref* type_basic? '(' prototype_arg (',' prototype_arg)* ','? ')' [':' type]
+prototype_struct_arg ::= type '{' struct_bind_member (',' struct_bind_member )* ','? '..'? ','? '}' [':' type]
+prototype_self_arg ::= ref? 'mut'? 'self'
+
+private struct_bind_member ::= IDENTIFIER ':' variable_signature | variable_signature
+private variable_signature ::= 'ref'? ref? 'mut'? itemName
+
+
+// ATTRIBUTES
+attribute ::= attribute_internal ']'
+private attribute_internal ::= '#' '!'? '[' attribute_list {pin=1 recoverWhile="attrib_recover"}
+private attribute_list ::= attribute_arg ( ',' attribute_arg )*
+attribute_arg ::= IDENTIFIER [ '=' literal | '(' attribute_list ')' ]
+private attrib_recover ::= !(']' | ';')
+
+
+// MOD
+mod_item ::= (comment | attribute)* visibility? 'mod' type_path (';' | '{' mod_contents '}') {pin=3 mixin="cairo.psi.mixin.item.CairoModItemMixin"}
+private mod_contents ::= ( use
+    | item
+    | attribute
+    | comment
+    | expr_macro
+    | macro_rules
+)* {recoverWhile="not_close_brace"}
+
+
+// STATIC
+static_item ::= (comment | attribute)* visibility? 'static' 'mut'? itemName ':' type '=' expr ';' {pin=3 mixin="cairo.psi.mixin.item.CairoStaticItemMixin"}
+
+// CONST
+const_item ::= (comment | attribute)* visibility? 'const' itemName ':' type '=' expr ';' {pin=3 mixin="cairo.psi.mixin.item.CairoConstItemMixin"}
+
+
+// TYPE
+type_item ::= (comment | attribute)* visibility? 'type' itemName generic_params? '=' type_sum ';' {pin=3 mixin="cairo.psi.mixin.item.CairoTypeItemMixin"}
+
+
+// MACRO
+macro_rules ::= 'macro_rules!' IDENTIFIER (macro_paren ';' | macro_bracket ';' | macro_brace)

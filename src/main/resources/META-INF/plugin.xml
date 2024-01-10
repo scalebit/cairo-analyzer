@@ -10,15 +10,14 @@
     <description> this is a test plugin for cairo in intellij </description>
 
     <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
-
+    <!--         LSP-->
     <extensions defaultExtensionNs="com.intellij">
-        <!-- LSP -->
-        <platform.lsp.serverSupportProvider implementation="FooLspServerSupportProvider"/>
+        <platform.lsp.serverSupportProvider implementation="CairoLspServerSupportProvider"/>
 
         <!-- fileType -->
         <fileType
                 name="Cairo File"
-                implementationClass="cairoplugin.language.CairoFileType"
+                implementationClass="cairo.CairoFileType"
                 fieldName="INSTANCE"
                 language="Cairo"
                 extensions="cairo"/>
@@ -26,15 +25,17 @@
         <!-- Parser -->
         <lang.parserDefinition
                 language="Cairo"
-                implementationClass="cairoplugin.language.CairoParserDefinition"/>
+                implementationClass="cairo.CairoParserDefinition"/>
 
-        <!-- high light -->
+
+        <highlightErrorFilter implementation="cairo.CairoClosingTagErrorFilter"/>
+<!--        &lt;!&ndash; high light &ndash;&gt;-->
         <lang.syntaxHighlighterFactory
                 language="Cairo"
-                implementationClass="cairoplugin.language.CairoSyntaxHighlighterFactory"/>
+                implementationClass="cairo.CairoSyntaxHighlighterFactory"/>
 
-
-
+        <colorSettingsPage
+                implementation="cairo.CairoColorSettingsPage"/>
 
 <!--        <toolWindow id="YourToolWindowId" anchor="bottom" secondary="true" factoryClass="YourToolWindowFactory"/>-->
     </extensions>
