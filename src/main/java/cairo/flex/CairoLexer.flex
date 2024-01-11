@@ -41,6 +41,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 
 %state IN_BLOCK_COMMENT
 %state IN_RAW_STRING
+%state FN_DECL_START
 
 %%
 
@@ -56,7 +57,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	"enum"                                          { yybegin(YYINITIAL); return CairoTokens.KW_ENUM; }
 	"extern"                                        { yybegin(YYINITIAL); return CairoTokens.KW_EXTERN; }
 	"false"                                         { yybegin(YYINITIAL); return CairoTokens.KW_FALSE; }
-	"fn"                                            { yybegin(YYINITIAL); return CairoTokens.KW_FN; }
+	"fn"                                            { yybegin(FN_DECL_START); return CairoTokens.KW_FN; }
 	"for"                                           { yybegin(YYINITIAL); return CairoTokens.KW_FOR; }
 	"if"                                            { yybegin(YYINITIAL); return CairoTokens.KW_IF; }
 	"impl"                                          { yybegin(YYINITIAL); return CairoTokens.KW_IMPL; }
@@ -83,7 +84,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	"use"                                           { yybegin(YYINITIAL); return CairoTokens.KW_USE; }
 	"while"                                         { yybegin(YYINITIAL); return CairoTokens.KW_WHILE; }
 	"continue"                                      { yybegin(YYINITIAL); return CairoTokens.KW_CONTINUE; }
-	"box"                                           { yybegin(YYINITIAL); return CairoTokens.KW_BOX; }
+//	"box"                                           { yybegin(YYINITIAL); return CairoTokens.KW_BOX; }
 	"where"                                         { yybegin(YYINITIAL); return CairoTokens.KW_WHERE; }
 	"macro_rules!"                                  { yybegin(YYINITIAL); return CairoTokens.KW_MACRO_RULES; }
 
@@ -104,6 +105,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	// ie 0..9 could be tokenized as 0. . 9, which would be bad.
 	[0-9] [0-9_]* "." /[^\.0-9e]                         { yybegin(YYINITIAL); return CairoTokens.DEC_LIT; }
 	{DEC_LIT}                                       { yybegin(YYINITIAL); return CairoTokens.DEC_LIT; }
+
 	{XID_START}{XID_CONTINUE}*                      { yybegin(YYINITIAL); return CairoTokens.IDENTIFIER; }
 
 
@@ -188,4 +190,26 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	[^\"]   { yybegin(IN_RAW_STRING); }
 	<<EOF>> { yybegin(YYINITIAL); zzStartRead = start_raw_string; return CairoTokens.RAW_STRING_LIT; }
 	.       { yybegin(IN_RAW_STRING); }
+}
+
+<FN_DECL_START> {
+
+    {WHITE_SPACE}+                                  { yybegin(FN_DECL_START); return TokenType.WHITE_SPACE; }
+    {XID_START}{XID_CONTINUE}*
+        {
+              yybegin(YYINITIAL);
+                    return CairoTokens.FN_DECLARATION;
+        }
+
+//    “ ”*{XID_START}{XID_CONTINUE}*
+//            {
+//                    System.out.println("start fn_decl_start <");
+//                  yybegin(YYINITIAL);
+//                        String funcation_decl = yytext().toString();
+//                        int funcation_decl_end = funcation_decl.indexOf("<");
+//                        zzStartRead += funcation_decl_end - 1;
+//                        zzMarkedPos = zzStartRead + 1;
+//                        return CairoTokens.FN_DECLARATION;
+//            }
+//    . { System.out.println("start fn_decl_start other"); yybegin(YYINITIAL); }
 }

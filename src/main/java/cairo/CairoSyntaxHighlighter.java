@@ -33,7 +33,7 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey PATH_SEPARATOR = TextAttributesKey.createTextAttributesKey("PATH_SEPARATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 	public static final TextAttributesKey ATTRIBUTE = TextAttributesKey.createTextAttributesKey("ATTRIBUTE", DefaultLanguageHighlighterColors.METADATA);
 	public static final TextAttributesKey DELIMITER = TextAttributesKey.createTextAttributesKey("DELIMITER", DefaultLanguageHighlighterColors.OPERATION_SIGN);
-	public static final TextAttributesKey EXPR_CALL = TextAttributesKey.createTextAttributesKey("EXPR_CALL", DefaultLanguageHighlighterColors.FUNCTION_CALL);
+	public static final TextAttributesKey FN_DECL = TextAttributesKey.createTextAttributesKey("FN_DECL", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
 	public static final TextAttributesKey BAD_CHAR = TextAttributesKey.createTextAttributesKey("BAD_CHAR", HighlighterColors.BAD_CHARACTER);
 
 
@@ -55,7 +55,7 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey[] PATH_SEPARATOR_KEYS = new TextAttributesKey[]{PATH_SEPARATOR};
 	public static final TextAttributesKey[] DELIMITER_KEYS = new TextAttributesKey[]{DELIMITER};
 
-	public static final TextAttributesKey[] EXPR_CALL_KEYS = new TextAttributesKey[]{EXPR_CALL};
+	public static final TextAttributesKey[] FN_DECL_KEYS = new TextAttributesKey[]{FN_DECL};
 	public static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHAR};
 	public static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
@@ -108,8 +108,8 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 			return KEYWORD_KEYS;
 		}
 
-		if (type == CairoTokens.EXPR_CALL) {
-			return EXPR_CALL_KEYS;
+		if (type == FN_DECLARATION) {
+			return FN_DECL_KEYS;
 		}
 
 		if (type == CairoTokens.IDENTIFIER) {

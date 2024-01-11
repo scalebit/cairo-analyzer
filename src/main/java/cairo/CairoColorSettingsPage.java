@@ -34,7 +34,7 @@ public class CairoColorSettingsPage implements ColorSettingsPage, InspectionColo
 			new AttributesDescriptor("Path_separator", CairoSyntaxHighlighter.PATH_SEPARATOR),
 			new AttributesDescriptor("Attribute", CairoSyntaxHighlighter.ATTRIBUTE),
 			new AttributesDescriptor("Delimiter", CairoSyntaxHighlighter.DELIMITER),
-			new AttributesDescriptor("ExprCall", CairoSyntaxHighlighter.EXPR_CALL),
+			new AttributesDescriptor("Fn_Decl", CairoSyntaxHighlighter.FN_DECL),
 			new AttributesDescriptor("Bad_char", CairoSyntaxHighlighter.BAD_CHAR),
 	};
 

@@ -937,7 +937,12 @@ class CairoLexer implements FlexLexer {
           // fall through
           case 134: break;
           case 36:
-            { yybegin(YYINITIAL);
+            { System.out.println("start fn_decl_start (");
+              yybegin(YYINITIAL);
+//                    String funcation_decl = yytext().toString();
+//                    int funcation_decl_end = funcation_decl.indexOf("(");
+//                    zzStartRead += funcation_decl_end - 1;
+//                    zzMarkedPos = zzStartRead + 1;
                     return CairoTokens.FN_DECLARATION;
             }
           // fall through

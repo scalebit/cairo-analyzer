@@ -1,11 +1,11 @@
 package cairo;
 
+import cairo.psi.CairoAttribute;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
-import cairo.psi.CairoAttribute;
 import cairo.psi.CairoTraitBounds;
 
 public class CairoAnnotator implements Annotator {
