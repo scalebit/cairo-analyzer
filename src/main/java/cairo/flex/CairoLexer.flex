@@ -106,6 +106,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	[0-9] [0-9_]* "." /[^\.0-9e]                         { yybegin(YYINITIAL); return CairoTokens.DEC_LIT; }
 	{DEC_LIT}                                       { yybegin(YYINITIAL); return CairoTokens.DEC_LIT; }
 
+    {XID_START}{XID_CONTINUE}*"("                   { yybegin(YYINITIAL); zzMarkedPos = zzMarkedPos - 1; return CairoTokens.EXPR_CALL; }
 	{XID_START}{XID_CONTINUE}*                      { yybegin(YYINITIAL); return CairoTokens.IDENTIFIER; }
 
 
