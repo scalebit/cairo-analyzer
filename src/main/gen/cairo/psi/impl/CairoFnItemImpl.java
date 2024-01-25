@@ -17,6 +17,7 @@ public class CairoFnItemImpl extends CairoFnItemMixin implements CairoFnItem {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitFnItem(this);
   }

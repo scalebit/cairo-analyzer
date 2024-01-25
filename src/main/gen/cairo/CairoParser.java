@@ -2480,7 +2480,7 @@ public class CairoParser implements PsiParser, LightPsiParser {
   // 	| BITWISE_XOR | DOUBLE_COLON | COLON | PLUS | MINUS | MULTIPLY | DIVIDE | REMAINDER | EQUAL | ASSIGN | NOT_EQUAL
   // 	| LESS_THAN_OR_EQUAL | LESS_THAN | GREATER_THAN_OR_EQUAL | GREATER_THAN | NOT | BOX | AT | SINGLE_QUOTE | DOLLAR
   // 	| HASH | COMMA | BAD_CHARACTER | RAW_STRING_LIT | ASSIGN_RIGHT_SHIFT | ASSIGN_LEFT_SHIFT | DOUBLE_DOT | TRIPLE_DOT
-  // 	| BLOCK_COMMENT | BLOCK_DOC_COMMENT
+  // 	| BLOCK_COMMENT | BLOCK_DOC_COMMENT | KW_OF | KW_NOPANIC
   static boolean macro_wildcard(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "macro_wildcard")) return false;
     boolean r;
@@ -2563,6 +2563,8 @@ public class CairoParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, TRIPLE_DOT);
     if (!r) r = consumeToken(b, BLOCK_COMMENT);
     if (!r) r = consumeToken(b, BLOCK_DOC_COMMENT);
+    if (!r) r = consumeToken(b, KW_OF);
+    if (!r) r = consumeToken(b, KW_NOPANIC);
     return r;
   }
 

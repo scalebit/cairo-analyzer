@@ -17,6 +17,7 @@ public class CairoStructPropertyImpl extends CairoStructPropertyMixin implements
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitStructProperty(this);
   }

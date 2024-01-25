@@ -17,6 +17,7 @@ public class CairoEnumItemImpl extends CairoEnumItemMixin implements CairoEnumIt
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitEnumItem(this);
   }

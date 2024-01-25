@@ -17,6 +17,7 @@ public class CairoConstItemImpl extends CairoConstItemMixin implements CairoCons
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitConstItem(this);
   }

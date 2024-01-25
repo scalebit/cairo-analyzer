@@ -17,6 +17,7 @@ public class CairoTypeItemImpl extends CairoTypeItemMixin implements CairoTypeIt
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitTypeItem(this);
   }

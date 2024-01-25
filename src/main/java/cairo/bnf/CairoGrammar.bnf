@@ -60,9 +60,11 @@
 		KW_BOX = "box"
 		KW_WHERE = "where"
 		KW_MACRO_RULES = "macro_rules!"
+		KW_OF = "of"
+		KW_NOPANIC = "nopanic"
 
 		FAT_ARROW = "=>"
-		THIN_ARROW = "->"
+		 = "->"
 		DOT = "."
 
 		BITWISE_AND = "&"
@@ -306,7 +308,7 @@ private macro_wildcard ::= KW_AS | KW_BREAK | KW_CRATE | KW_ELSE | KW_ENUM | KW_
 	| BITWISE_XOR | DOUBLE_COLON | COLON | PLUS | MINUS | MULTIPLY | DIVIDE | REMAINDER | EQUAL | ASSIGN | NOT_EQUAL
 	| LESS_THAN_OR_EQUAL | LESS_THAN | GREATER_THAN_OR_EQUAL | GREATER_THAN | NOT | BOX | AT | SINGLE_QUOTE | DOLLAR
 	| HASH | COMMA | BAD_CHARACTER | RAW_STRING_LIT | ASSIGN_RIGHT_SHIFT | ASSIGN_LEFT_SHIFT | DOUBLE_DOT | TRIPLE_DOT
-	| BLOCK_COMMENT | BLOCK_DOC_COMMENT
+	| BLOCK_COMMENT | BLOCK_DOC_COMMENT | KW_OF | KW_NOPANIC
 
 // Builtin expressions
 private builtin_expression_group ::= expr_continue | expr_break

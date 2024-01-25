@@ -35,6 +35,8 @@ public class CairoColorSettingsPage implements ColorSettingsPage, InspectionColo
 			new AttributesDescriptor("Attribute", CairoSyntaxHighlighter.ATTRIBUTE),
 			new AttributesDescriptor("Delimiter", CairoSyntaxHighlighter.DELIMITER),
 			new AttributesDescriptor("Fn_Decl", CairoSyntaxHighlighter.FN_DECL),
+			new AttributesDescriptor("TYPE", CairoSyntaxHighlighter.TYPE),
+//			new AttributesDescriptor("ITEM_NAME", CairoSyntaxHighlighter.ITEM_NAME),
 			new AttributesDescriptor("Expr_Call", CairoSyntaxHighlighter.EXPR_CALL),
 			new AttributesDescriptor("Bad_char", CairoSyntaxHighlighter.BAD_CHAR),
 	};
@@ -56,6 +58,9 @@ public class CairoColorSettingsPage implements ColorSettingsPage, InspectionColo
 	public String getDemoText() {
 		return "use std::rand;\n" +
 				"\n" +
+				"extern fn array_pop_front<T>(ref arr: Array<T>) -> Option<Box<T>> nopanic;\n"+
+				"fn fn_name <generic1, generic2<generic3<generic4<generic5>>>, aaa>(ref arr: Array<T>) {\n"+
+				"}\n"+
 				"/**\n" +
 				" * Our main function\n" +
 				" */\n" +

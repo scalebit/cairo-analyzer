@@ -17,6 +17,7 @@ public class CairoStaticItemImpl extends CairoStaticItemMixin implements CairoSt
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitStaticItem(this);
   }

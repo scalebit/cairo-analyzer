@@ -221,6 +221,8 @@ public interface CairoTokens {
   IElementType KW_MOD = new CairoTokenType("mod");
   IElementType KW_MOVE = new CairoTokenType("move");
   IElementType KW_MUT = new CairoTokenType("mut");
+  IElementType KW_NOPANIC = new CairoTokenType("nopanic");
+  IElementType KW_OF = new CairoTokenType("of");
   IElementType KW_PRIV = new CairoTokenType("priv");
   IElementType KW_PROC = new CairoTokenType("proc");
   IElementType KW_PUB = new CairoTokenType("pub");

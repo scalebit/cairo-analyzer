@@ -27,8 +27,8 @@
                 language="Cairo"
                 implementationClass="cairo.CairoParserDefinition"/>
 
-
         <highlightErrorFilter implementation="cairo.CairoClosingTagErrorFilter"/>
+
 <!--        &lt;!&ndash; high light &ndash;&gt;-->
         <lang.syntaxHighlighterFactory
                 language="Cairo"

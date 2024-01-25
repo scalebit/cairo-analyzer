@@ -17,6 +17,7 @@ public class CairoStructItemImpl extends CairoStructItemMixin implements CairoSt
     super(node);
   }
 
+  @Override
   public void accept(@NotNull CairoVisitor visitor) {
     visitor.visitStructItem(this);
   }
