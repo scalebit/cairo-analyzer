@@ -8,8 +8,7 @@ intellij {
     type = "IU"
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "BitsLab.ScaleBit"
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")

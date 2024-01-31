@@ -9,7 +9,7 @@ import cairo.psi.*;
 import javax.swing.*;
 
 public class CairoIcons {
-	public static final Icon ICON_CAIRO_16 = IconLoader.getIcon("/META-INF/pluginIcon.svg");
+	public static final Icon ICON_CAIRO_16 = IconLoader.getIcon("/META-INF/cairo-file-logo.png");
 	public static final Icon ICON_CAIRO_24 = IconLoader.getIcon("/vektah/cairo/icons/logo24.png");
 	public static final Icon ICON_CAIRO_32 = IconLoader.getIcon("/vektah/cairo/icons/logo32.png");
 	public static final Icon ICON_CAIRO_48 = IconLoader.getIcon("/vektah/cairo/icons/logo48.png");

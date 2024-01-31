@@ -1,13 +1,27 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>Cairo_Analyzer_Test</id>
-    <name>Cairo Analyzer test</name>
-    <vendor>0.0.1</vendor>
+    <id>Cairo_Analyze</id>
+    <name>Cairo Analyzer</name>
+    <vendor url="https://www.scalebit.xyz/" email="623151737@qq.com">BitsLab.ScaleBit</vendor>
+    <version>0.0.1</version>
 
     <depends>com.intellij.modules.ultimate</depends>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
-    <description> this is a test plugin for cairo in intellij </description>
+    <description><![CDATA[
+    Adds support for the Cairo language.
+    These features are available for free with IntelliJ IDEA Community Edition:
+    <ul>
+        <li>highlighting</li>
+        <li>completion</li>
+        <li>formatting</li>
+        <li>hover</li>
+        <li>goto definition</li>
+    </ul>
+    For more information visit the
+    <a href="https://github.com/movebit/cairo-plugin">project site</a>.
+    ]]>
+    </description>
 
     <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
     <!--         LSP-->
