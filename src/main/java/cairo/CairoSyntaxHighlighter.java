@@ -16,10 +16,16 @@ import java.io.Reader;
 
 import static cairo.psi.CairoTokens.*;
 
+
+
 public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
-	private  static JBColor Cyan =  new JBColor(0xFF00BBBB, 0xFF00BBBB);
-	private  static JBColor Lavender =  new JBColor(0xFFFFBBBB, 0xFFFFBBBB);
-	private  static JBColor Lilac =  new JBColor(0xFFC8A0FF, 0xFFC8A0FF);
+	private  static final JBColor Cyan =  new JBColor(0xFF00BBBB, 0xFF00BBBB);
+	private  static final JBColor Lilac =  new JBColor(0xFFC8A0FF, 0xFFC8A0FF);
+	private enum NonDefaultTextAttributesKey {
+		TYPE_KEY,
+		EXPR_CALL_KEY
+	}
+
 	public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
 	public static final TextAttributesKey IDENTIFIER = TextAttributesKey.createTextAttributesKey("IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
 	public static final TextAttributesKey BLOCK_COMMENT = TextAttributesKey.createTextAttributesKey("BLOCK_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT);
@@ -38,13 +44,10 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey ATTRIBUTE = TextAttributesKey.createTextAttributesKey("ATTRIBUTE", DefaultLanguageHighlighterColors.METADATA);
 	public static final TextAttributesKey DELIMITER = TextAttributesKey.createTextAttributesKey("DELIMITER", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 	public static final TextAttributesKey FN_DECL = TextAttributesKey.createTextAttributesKey("FN_DECL", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
-	public static final TextAttributesKey EXPR_CALL = createTextAttributesKey("EXPR_CALL", Lilac);
-	public static final TextAttributesKey TYPE = createTextAttributesKey("TYPE", Cyan);
-
-//	public static final TextAttributesKey ITEM_NAME = createTextAttributesKey("ITEM_NAME", Cyan);
+	public static final TextAttributesKey EXPR_CALL = createTextAttributesKey("EXPR_CALL", NonDefaultTextAttributesKey.EXPR_CALL_KEY);
+	public static final TextAttributesKey TYPE = createTextAttributesKey("TYPE", NonDefaultTextAttributesKey.TYPE_KEY);
 
 	public static final TextAttributesKey BAD_CHAR = TextAttributesKey.createTextAttributesKey("BAD_CHAR", HighlighterColors.BAD_CHARACTER);
-
 	public static final TextAttributesKey[] KEYWORD_KEYS = new TextAttributesKey[]{KEYWORD};
 	public static final TextAttributesKey[] IDENTIFIER_KEYS = new TextAttributesKey[]{IDENTIFIER};
 	public static final TextAttributesKey[] BLOCK_COMMENT_KEYS = new TextAttributesKey[]{BLOCK_COMMENT};
@@ -65,7 +68,6 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey[] FN_DECL_KEYS = new TextAttributesKey[]{FN_DECL};
 	public static final TextAttributesKey[] EXPR_CALL_KEYS = new TextAttributesKey[]{EXPR_CALL};
 	public static final TextAttributesKey[] TYPE_KEYS = new TextAttributesKey[]{TYPE};
-//	public static final TextAttributesKey[] ITEM_NAME_KEYS = new TextAttributesKey[]{ITEM_NAME};
 	public static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHAR};
 	public static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
@@ -126,9 +128,6 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 		if (type == CairoTokens.TYPE) {
 			return TYPE_KEYS;
 		}
-//		if (type == CairoTokens.ITEM_NAME) {
-//			return ITEM_NAME_KEYS;
-//		}
 		if (type == CairoTokens.EXPR_CALL) {
 			return EXPR_CALL_KEYS;
 		}
@@ -220,9 +219,14 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	}
 
 	// 创建 TextAttributesKey 的方法
-	private static TextAttributesKey createTextAttributesKey(String externalName, JBColor color) {
+	private static TextAttributesKey createTextAttributesKey(String externalName, NonDefaultTextAttributesKey textKey) {
 		TextAttributes textAttributes = new TextAttributes();
-		textAttributes.setForegroundColor(color); // 设置前景色
+		if (textKey == NonDefaultTextAttributesKey.TYPE_KEY) {
+			textAttributes.setForegroundColor(JBColor.CYAN);
+		} else if (textKey == NonDefaultTextAttributesKey.EXPR_CALL_KEY) {
+			textAttributes.setForegroundColor(JBColor.YELLOW);
+		}
+		// 设置前景色
 		// 你可以在这里设置其他属性，如背景色、字体类型等
 		return TextAttributesKey.createTextAttributesKey(externalName, textAttributes);
 	}

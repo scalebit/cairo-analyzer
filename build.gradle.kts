@@ -8,6 +8,8 @@ intellij {
     type = "IU"
 }
 
+intellij.updateSinceUntilBuild = false
+
 group = "BitsLab.ScaleBit"
 
 dependencies {
