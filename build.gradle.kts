@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.20"
-    id("org.jetbrains.intellij") version "1.16.1"
+    id("org.jetbrains.intellij") version "1.17.3"
 }
 sourceSets["main"].java.srcDirs("src/main/gen")
 intellij {
