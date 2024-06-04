@@ -21,6 +21,9 @@ import cairo.psi.CairoTokens;
     public enum CallItemType {
                 FN_PARA, FN_RETURN, STRUCT_FIELD, IMPL_FIRST
     }
+    public enum CallCommentType {
+                LET, STRUCT_FIELD
+    }
 	private int start_comment;
 	private int start_raw_string;
 	private int raw_string_hashes;
@@ -28,6 +31,7 @@ import cairo.psi.CairoTokens;
     private int generic_para_depth = 0;
     private CallGenericType call_generic_type;
     private CallItemType call_item_type;
+    private CallCommentType call_comment_type;
 	private boolean doc_comment;
 %}
 
@@ -52,10 +56,13 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 %state IN_BLOCK_COMMENT
 %state IN_RAW_STRING
 %state FN_DECL_START, FN_DECL_PARA, FN_RETURN_DECL_TYPE
+%state LET_START, LET_SINGLE_IDENTIFY
+%state CONST_START, CONST_SINGLE_IDENTIFY
+%state HASH_START
 %state GENERIC_PARAM_STATE, NESTED_GENERIC_PARAM_STATE
 %state STATE_STRUCT_FIELD, STRUCT_DECL_START,STATE_STRUCT_FIELD_TYPE
 %state IMPL_DECL
-%state ITEM_TYPE
+%state ITEM_TYPE, ITEM_TYPE222
 
 %%
 
@@ -65,7 +72,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	// Keywords
 	"as"                                            { yybegin(YYINITIAL); return CairoTokens.KW_AS; }
 	"break"                                         { yybegin(YYINITIAL); return CairoTokens.KW_BREAK; }
-	"const"                                         { yybegin(YYINITIAL); return CairoTokens.KW_CONST; }
+	"const"                                         { yybegin(CONST_START); return CairoTokens.KW_CONST; }
 	"crate"                                         { yybegin(YYINITIAL); return CairoTokens.KW_CRATE; }
 	"else"                                          { yybegin(YYINITIAL); return CairoTokens.KW_ELSE; }
 	"enum"                                          { yybegin(YYINITIAL); return CairoTokens.KW_ENUM; }
@@ -76,7 +83,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	"if"                                            { yybegin(YYINITIAL); return CairoTokens.KW_IF; }
 	"impl"                                          { yybegin(IMPL_DECL); return CairoTokens.KW_IMPL; }
 	"in"                                            { yybegin(YYINITIAL); return CairoTokens.KW_IN; }
-	"let"                                           { yybegin(YYINITIAL); return CairoTokens.KW_LET; }
+	"let"                                           { yybegin(LET_START); return CairoTokens.KW_LET; }
 	"loop"                                          { yybegin(YYINITIAL); return CairoTokens.KW_LOOP; }
 	"match"                                         { yybegin(YYINITIAL); return CairoTokens.KW_MATCH; }
 	"mod"                                           { yybegin(YYINITIAL); return CairoTokens.KW_MOD; }
@@ -124,6 +131,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	{DEC_LIT}                                       { yybegin(YYINITIAL); return CairoTokens.DEC_LIT; }
 
     {XID_START}{XID_CONTINUE}*"("                   { yybegin(YYINITIAL); zzMarkedPos = zzMarkedPos - 1; return CairoTokens.EXPR_CALL; }
+	{XID_START}{XID_CONTINUE}*"!("                  { yybegin(YYINITIAL); zzMarkedPos = zzMarkedPos - 1; return CairoTokens.MACRO_EXPR_CALL; }
 	{XID_START}{XID_CONTINUE}*                      { yybegin(YYINITIAL); return CairoTokens.IDENTIFIER; }
 
 
@@ -162,6 +170,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	"'"                                             { yybegin(YYINITIAL); return CairoTokens.SINGLE_QUOTE; }
 	"$"                                             { yybegin(YYINITIAL); return CairoTokens.DOLLAR; }
 
+    "#["                                             { yybegin(HASH_START); return CairoTokens.HASH; }
 	"#"                                             { yybegin(YYINITIAL); return CairoTokens.HASH; }
 	"["                                             { yybegin(YYINITIAL); return CairoTokens.OPEN_SQUARE_BRACKET; }
 	"]"                                             { yybegin(YYINITIAL); return CairoTokens.CLOSE_SQUARE_BRACKET; }
@@ -179,6 +188,9 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	"*/"        {
 		if (--comment_depth == 0) {
 			yybegin(YYINITIAL);
+            if (call_comment_type == CallCommentType.STRUCT_FIELD) {
+                yybegin(STATE_STRUCT_FIELD);
+            }
 			zzStartRead = start_comment;
 			return doc_comment ? CairoTokens.BLOCK_DOC_COMMENT : CairoTokens.BLOCK_COMMENT;
 		} else {
@@ -210,6 +222,17 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 	.       { yybegin(IN_RAW_STRING); }
 }
 
+<HASH_START> {
+    {WHITE_SPACE}+                                  { yybegin(HASH_START); return TokenType.WHITE_SPACE; }
+    {XID_START}{XID_CONTINUE}*                      { yybegin(HASH_START); return CairoTokens.KW_HASH;}
+    "("                                             { yybegin(HASH_START); return CairoTokens.OPEN_PAREN;}
+    ")"                                             { yybegin(HASH_START); return CairoTokens.CLOSE_PAREN;}
+    ","                                             { yybegin(HASH_START); return CairoTokens.COMMA;}
+    "]"                                             {yybegin(YYINITIAL); return CairoTokens.CLOSE_SQUARE_BRACKET;}
+    '\n'                                            {yybegin(YYINITIAL);}
+    .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
 <STRUCT_DECL_START> {
     {WHITE_SPACE}+                                  { yybegin(STRUCT_DECL_START); return TokenType.WHITE_SPACE; }
     {XID_START}{XID_CONTINUE}*                      { yybegin(STRUCT_DECL_START); return CairoTokens.TYPE;}
@@ -220,13 +243,53 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 }
 
 <STATE_STRUCT_FIELD> {
+  "/*" ("!"|"*"[^*/])                             { yybegin(IN_BLOCK_COMMENT); call_comment_type = CallCommentType.STRUCT_FIELD;start_comment = zzStartRead; doc_comment = true; comment_depth = 1; }
+  "/**" / "/"                                     { yybegin(IN_BLOCK_COMMENT); call_comment_type = CallCommentType.STRUCT_FIELD;start_comment = zzStartRead; doc_comment = true; comment_depth = 1; }
+  "/*"                                            { yybegin(IN_BLOCK_COMMENT); call_comment_type = CallCommentType.STRUCT_FIELD;start_comment = zzStartRead; doc_comment = false; comment_depth = 1; }
+  "///" $                                         { yybegin(STATE_STRUCT_FIELD); return CairoTokens.LINE_DOC_COMMENT; }
+  "//" ("!"|"/"[^/\n\r])[^\n\r]*                  { yybegin(STATE_STRUCT_FIELD); return CairoTokens.LINE_DOC_COMMENT; }
+  "//" [^\n\r]*                                   { yybegin(STATE_STRUCT_FIELD); return CairoTokens.LINE_COMMENT; }
+
     "pub"                                           { yybegin(STATE_STRUCT_FIELD); return CairoTokens.KW_PUB; }
+    "crate"                                         { yybegin(STATE_STRUCT_FIELD); return CairoTokens.KW_CRATE; }
     {WHITE_SPACE}+                                  { yybegin(STATE_STRUCT_FIELD); return TokenType.WHITE_SPACE; }
-     {XID_START}{XID_CONTINUE}*                      {yybegin(STATE_STRUCT_FIELD); return CairoTokens.IDENTIFIER;}
-     ":"                                            {yybegin(ITEM_TYPE); call_item_type = CallItemType.STRUCT_FIELD; return CairoTokens.COLON;}
+    "("                                             { yybegin(STATE_STRUCT_FIELD); return CairoTokens.OPEN_PAREN; }
+    ")"                                             { yybegin(STATE_STRUCT_FIELD); return CairoTokens.CLOSE_PAREN; }
+
+     {XID_START}{XID_CONTINUE}*                     {yybegin(STATE_STRUCT_FIELD); return CairoTokens.IDENTIFIER;}
+     ":"                                            {call_item_type = CallItemType.STRUCT_FIELD;yybegin(ITEM_TYPE);  return CairoTokens.COLON;}
     "}"                                             {yybegin(YYINITIAL);}
+    '\n'                                            {yybegin(STATE_STRUCT_FIELD);}
+     .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
+<CONST_START> {
+    {WHITE_SPACE}+                                  { yybegin(CONST_START); return TokenType.WHITE_SPACE; }
+    {XID_START}{XID_CONTINUE}*                      { yybegin(CONST_SINGLE_IDENTIFY); return CairoTokens.IDENTIFIER;}
     '\n'                                            {yybegin(YYINITIAL);}
-      .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+    .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
+<CONST_SINGLE_IDENTIFY> {
+    {WHITE_SPACE}+                                  { yybegin(CONST_SINGLE_IDENTIFY); return TokenType.WHITE_SPACE; }
+    ":"                                             { yybegin(ITEM_TYPE); return CairoTokens.COLON;}
+    '\n'                                            {yybegin(YYINITIAL);}
+    .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
+<LET_START> {
+    {WHITE_SPACE}+                                  { yybegin(LET_START); return TokenType.WHITE_SPACE; }
+    "mut"                                           { yybegin(LET_START); return CairoTokens.KW_MUT; }
+    {XID_START}{XID_CONTINUE}*                      { yybegin(LET_SINGLE_IDENTIFY); return CairoTokens.IDENTIFIER;}
+    '\n'                                            {yybegin(YYINITIAL);}
+    .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
+<LET_SINGLE_IDENTIFY> {
+    {WHITE_SPACE}+                                  { yybegin(LET_SINGLE_IDENTIFY); return TokenType.WHITE_SPACE; }
+    ":"                                             { yybegin(ITEM_TYPE); return CairoTokens.COLON;}
+    '\n'                                            {yybegin(YYINITIAL);}
+    .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
 
 <FN_DECL_START> {
@@ -263,6 +326,23 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
     .                                             {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
 
+
+<ITEM_TYPE222> {
+    {WHITE_SPACE}+                                  { yybegin(ITEM_TYPE222); return TokenType.WHITE_SPACE; }
+    "of"                                            { yybegin(ITEM_TYPE222); return CairoTokens.KW_OF; }
+    "nopanic"                                         { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_NOPANIC; }
+    "@"*{XID_START}{XID_CONTINUE}*                      {yybegin(ITEM_TYPE222); return CairoTokens.TYPE;}
+    "::"                                                {yybegin(ITEM_TYPE222); return CairoTokens.DOUBLE_COLON;}
+//    "<"                          {yybegin(GENERIC_PARAM_STATE); call_generic_type = CallGenericType.ITEM_TYPE;generic_para_depth = 0; return CairoTokens.LESS_THAN;}
+    '\n'                                            {yybegin(ITEM_TYPE222);}
+
+      ","             {
+          yybegin(STATE_STRUCT_FIELD);
+            return CairoTokens.COMMA;
+        }
+.                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
+}
+
 <ITEM_TYPE> {
     {WHITE_SPACE}+                                  { yybegin(ITEM_TYPE); return TokenType.WHITE_SPACE; }
     "of"                                            { yybegin(ITEM_TYPE); return CairoTokens.KW_OF; }
@@ -282,6 +362,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
         else if (call_item_type == CallItemType.IMPL_FIRST) {
             yybegin(IMPL_DECL);
         }
+
           return CairoTokens.COMMA;
       }
     "::"                                                {yybegin(ITEM_TYPE); return CairoTokens.DOUBLE_COLON;}

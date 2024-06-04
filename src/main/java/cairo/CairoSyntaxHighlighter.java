@@ -19,8 +19,8 @@ import static cairo.psi.CairoTokens.*;
 
 
 public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
-	private  static final JBColor Cyan =  new JBColor(0xFF00BBBB, 0xFF00BBBB);
-	private  static final JBColor Lilac =  new JBColor(0xFFC8A0FF, 0xFFC8A0FF);
+	private  static final JBColor BBLUE =  new JBColor(0xFF56A8F5, 0xFF56A8F5);
+	private  static final JBColor Dark_Orange =  new JBColor(0xFFC77DBB, 0xFFC77DBB);
 	private enum NonDefaultTextAttributesKey {
 		TYPE_KEY,
 		EXPR_CALL_KEY
@@ -45,7 +45,9 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey DELIMITER = TextAttributesKey.createTextAttributesKey("DELIMITER", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 	public static final TextAttributesKey FN_DECL = TextAttributesKey.createTextAttributesKey("FN_DECL", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
 	public static final TextAttributesKey EXPR_CALL = createTextAttributesKey("EXPR_CALL", NonDefaultTextAttributesKey.EXPR_CALL_KEY);
+	public static final TextAttributesKey MACRO_EXPR_CALL = createTextAttributesKey("MACRO_EXPR_CALL", NonDefaultTextAttributesKey.EXPR_CALL_KEY);
 	public static final TextAttributesKey TYPE = createTextAttributesKey("TYPE", NonDefaultTextAttributesKey.TYPE_KEY);
+	public static final TextAttributesKey HASH_TRAIT = createTextAttributesKey("HASH_TRAIT", NonDefaultTextAttributesKey.TYPE_KEY);
 
 	public static final TextAttributesKey BAD_CHAR = TextAttributesKey.createTextAttributesKey("BAD_CHAR", HighlighterColors.BAD_CHARACTER);
 	public static final TextAttributesKey[] KEYWORD_KEYS = new TextAttributesKey[]{KEYWORD};
@@ -66,8 +68,10 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	public static final TextAttributesKey[] DELIMITER_KEYS = new TextAttributesKey[]{DELIMITER};
 
 	public static final TextAttributesKey[] FN_DECL_KEYS = new TextAttributesKey[]{FN_DECL};
+	public static final TextAttributesKey[] MARCO_EXPR_CALL_KEYS = new TextAttributesKey[]{MACRO_EXPR_CALL};
 	public static final TextAttributesKey[] EXPR_CALL_KEYS = new TextAttributesKey[]{EXPR_CALL};
 	public static final TextAttributesKey[] TYPE_KEYS = new TextAttributesKey[]{TYPE};
+	public static final TextAttributesKey[] HASH_TRAIT_KEYS = new TextAttributesKey[]{FN_DECL};
 	public static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHAR};
 	public static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
@@ -117,11 +121,17 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 			type == KW_BOX |
 			type == KW_WHERE |
 			type == KW_NOPANIC |
-			type == KW_OF
+			type == KW_OF |
+			type == KW_CONST
 		) {
 			return KEYWORD_KEYS;
 		}
-
+		if (type == KW_HASH) {
+			return HASH_TRAIT_KEYS;
+		}
+		if (type == CairoTokens.MACRO_EXPR_CALL) {
+			return MARCO_EXPR_CALL_KEYS;
+		}
 		if (type == CairoTokens.FN_DECLARATION) {
 			return FN_DECL_KEYS;
 		}
@@ -222,9 +232,9 @@ public class CairoSyntaxHighlighter extends SyntaxHighlighterBase {
 	private static TextAttributesKey createTextAttributesKey(String externalName, NonDefaultTextAttributesKey textKey) {
 		TextAttributes textAttributes = new TextAttributes();
 		if (textKey == NonDefaultTextAttributesKey.TYPE_KEY) {
-			textAttributes.setForegroundColor(JBColor.CYAN);
+			textAttributes.setForegroundColor(BBLUE);
 		} else if (textKey == NonDefaultTextAttributesKey.EXPR_CALL_KEY) {
-			textAttributes.setForegroundColor(JBColor.YELLOW);
+			textAttributes.setForegroundColor(Dark_Orange);
 		}
 		// 设置前景色
 		// 你可以在这里设置其他属性，如背景色、字体类型等

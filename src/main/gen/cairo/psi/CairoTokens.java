@@ -50,6 +50,7 @@ public interface CairoTokens {
   IElementType EXPR_BORROW = new CairoTokenType("EXPR_BORROW");
   IElementType EXPR_BOX = new CairoTokenType("EXPR_BOX");
   IElementType EXPR_BREAK = new CairoTokenType("EXPR_BREAK");
+  IElementType MACRO_EXPR_CALL = new CairoTokenType("MACRO_EXPR_CALL");
   IElementType EXPR_CALL = new CairoTokenType("EXPR_CALL");
   IElementType EXPR_CLOSURE = new CairoTokenType("EXPR_CLOSURE");
   IElementType EXPR_CONTINUE = new CairoTokenType("EXPR_CONTINUE");
@@ -259,6 +260,8 @@ public interface CairoTokens {
   IElementType STRING_LIT = new CairoTokenType("STRING_LIT");
   IElementType THIN_ARROW = new CairoTokenType("->");
   IElementType TRIPLE_DOT = new CairoTokenType("...");
+
+  IElementType KW_HASH = new CairoTokenType("hash");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
