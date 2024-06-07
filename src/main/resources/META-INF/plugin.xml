@@ -2,31 +2,16 @@
 <idea-plugin>
     <id>Cairo_Analyze</id>
     <name>Cairo Analyzer</name>
-    <vendor url="https://www.scalebit.xyz/" email="623151737@qq.com">BitsLab.ScaleBit</vendor>
-    <version>0.0.3</version>
+    <vendor url="https://www.scalebit.xyz/" email="jason@scalebit.com">BitsLab.ScaleBit</vendor>
+    <version>0.0.6</version>
     <idea-version since-build="233.11799.30"/>
 
     <depends>com.intellij.modules.ultimate</depends>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <description><![CDATA[
-    <p style="font-size: 16px;">Introduction</p>
-    <p>Support for the Cairo language.</p>
-    <hr>
-
-    <p style="font-size: 16px;">Usage</p>
-    <p>0 Change the permissions of the executable 'cairo-language-server' to 777. </p>
-    <p>1 Install this plugin</p>
-    <p>2 Enter "Cairo Analyzer Settings". </p>
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;2.1 On Windows OS, select "File -> Settings -> Tools -> Cairo Analyzer Setting". </p>
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;2.2 On macOS, select "Intellij IDEA -> preferences -> Tools -> Cairo Analyzer Setting". </p>
-    <p>3 enter the local address of the language server and corelib, such as "C:\Users\UserName\SomePath\cairo-language-server.exe" and "C:\Users\UserName\SomePath\corelib" </p>
-    <p>4 Allow the execution of cairo-language-server in System Preferences and grant permissions in IntelliJ IDEA on macOS</p>
-    <p>5 Restart IDEA.</p>
-
-    <hr>
-    <p style="font-size: 16px;">Features</p>
-    These features are available for free with IntelliJ IDEA Ultimate Edition:
+    <p>Support for the Cairo language.
+    These features are available for free with IntelliJ IDEA Ultimate Edition:</p>
     <ul>
         <li>highlighting</li>
         <li>completion</li>
@@ -35,15 +20,20 @@
         <li>goto definition</li>
     </ul>
     For more information, visit the
-    <a href="https://github.com/movebit/cairo-plugin">project site</a>.\
-
-    <hr>
-    <p style="font-size: 16px;> TroubleShooting </p>
-    <p>1. Install this plugin</p>
+    <a href="https://github.com/scalebit/cairo-analyzer">project site</a>.
 ]]>
 
     </description>
 
+    <change-notes><![CDATA[
+        <h1>New Features</h1>
+        <h3>  Supported more syntax highlighting  </h2>
+        <ul>
+          <li>macro functions</li>
+          <li>types and generics in structures declaration</li>
+        </ul>
+        ]]>
+    </change-notes>
 
     <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->
     <!--         LSP-->
