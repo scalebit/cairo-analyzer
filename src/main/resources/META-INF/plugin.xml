@@ -27,12 +27,22 @@
 
     <change-notes><![CDATA[
         <h1>New Features</h1>
+        <a href="https://github.com/scalebit/cairo-analyzer/blob/main/ChangeLog/0.0.6/">ChangeLog</a>.
         <h3>  Supported more syntax highlighting  </h2>
+
         <ul>
           <li>macro functions</li>
           <li>types and generics in structures declaration</li>
         </ul>
+
+        <h1>Bug Fix</h1>
+        <ul>
+          <li> The highlighting for type declarations in the form of @(T1, T2, T3) has been fixed and can now be highlighted properly</li>
+        </ul>
+
         ]]>
+
+
     </change-notes>
 
     <!--    <resource-bundle>messages.MyBundle 111111111</resource-bundle>-->

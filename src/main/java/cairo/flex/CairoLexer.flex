@@ -27,7 +27,7 @@ import cairo.psi.CairoTokens;
 	private int start_comment;
 	private int start_raw_string;
 	private int raw_string_hashes;
-	private int comment_depth;
+	private int comment_depth, item_type_parenthesis_depth = 0;
     private int generic_para_depth = 0;
     private CallGenericType call_generic_type;
     private CallItemType call_item_type;
@@ -62,7 +62,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 %state GENERIC_PARAM_STATE, NESTED_GENERIC_PARAM_STATE
 %state STATE_STRUCT_FIELD, STRUCT_DECL_START,STATE_STRUCT_FIELD_TYPE
 %state IMPL_DECL
-%state ITEM_TYPE, ITEM_TYPE222
+%state ITEM_TYPE
 
 %%
 
@@ -257,7 +257,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
     ")"                                             { yybegin(STATE_STRUCT_FIELD); return CairoTokens.CLOSE_PAREN; }
 
      {XID_START}{XID_CONTINUE}*                     {yybegin(STATE_STRUCT_FIELD); return CairoTokens.IDENTIFIER;}
-     ":"                                            {call_item_type = CallItemType.STRUCT_FIELD;yybegin(ITEM_TYPE);  return CairoTokens.COLON;}
+     ":"                                            {item_type_parenthesis_depth = 0;call_item_type = CallItemType.STRUCT_FIELD;yybegin(ITEM_TYPE);  return CairoTokens.COLON;}
     "}"                                             {yybegin(YYINITIAL);}
     '\n'                                            {yybegin(STATE_STRUCT_FIELD);}
      .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
@@ -272,7 +272,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 
 <CONST_SINGLE_IDENTIFY> {
     {WHITE_SPACE}+                                  { yybegin(CONST_SINGLE_IDENTIFY); return TokenType.WHITE_SPACE; }
-    ":"                                             { yybegin(ITEM_TYPE); return CairoTokens.COLON;}
+    ":"                                             { item_type_parenthesis_depth = 0;yybegin(ITEM_TYPE); return CairoTokens.COLON;}
     '\n'                                            {yybegin(YYINITIAL);}
     .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
@@ -287,7 +287,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
 
 <LET_SINGLE_IDENTIFY> {
     {WHITE_SPACE}+                                  { yybegin(LET_SINGLE_IDENTIFY); return TokenType.WHITE_SPACE; }
-    ":"                                             { yybegin(ITEM_TYPE); return CairoTokens.COLON;}
+    ":"                                             { item_type_parenthesis_depth = 0;yybegin(ITEM_TYPE); return CairoTokens.COLON;}
     '\n'                                            {yybegin(YYINITIAL);}
     .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
@@ -308,7 +308,7 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
      "ref"                                           { yybegin(FN_DECL_PARA); return CairoTokens.KW_REF; }
      "mut"                                           { yybegin(FN_DECL_PARA); return CairoTokens.KW_MUT; }
     {XID_START}{XID_CONTINUE}*                      {yybegin(FN_DECL_PARA); return CairoTokens.IDENTIFIER;}
-    ":"                                              {yybegin(ITEM_TYPE);  call_item_type = CallItemType.FN_PARA;return CairoTokens.COLON; }
+    ":"                                              {item_type_parenthesis_depth = 0;yybegin(ITEM_TYPE);  call_item_type = CallItemType.FN_PARA;return CairoTokens.COLON; }
     '\n'                                            {yybegin(YYINITIAL);}
      .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
@@ -319,38 +319,28 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
    "ref"                                           { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_REF; }
    "mut"                                           { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_MUT; }
    "nopanic"                                         { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_NOPANIC; }
-   "@"*{XID_START}{XID_CONTINUE}*                      {yybegin(ITEM_TYPE); return CairoTokens.TYPE;}
-    "("                                              {yybegin(ITEM_TYPE); call_item_type = CallItemType.FN_RETURN;return CairoTokens.COLON; }
+   "@"*{XID_START}{XID_CONTINUE}*                      {item_type_parenthesis_depth = 0;yybegin(ITEM_TYPE); return CairoTokens.TYPE;}
+    "("                                              {item_type_parenthesis_depth = 0;yybegin(ITEM_TYPE); call_item_type = CallItemType.FN_RETURN;return CairoTokens.COLON; }
     "{"                                             {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(FN_DECL_START); return CairoTokens.OPEN_BRACE;}
     '\n'                                            {yybegin(YYINITIAL);}
     .                                             {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
 
 
-<ITEM_TYPE222> {
-    {WHITE_SPACE}+                                  { yybegin(ITEM_TYPE222); return TokenType.WHITE_SPACE; }
-    "of"                                            { yybegin(ITEM_TYPE222); return CairoTokens.KW_OF; }
-    "nopanic"                                         { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_NOPANIC; }
-    "@"*{XID_START}{XID_CONTINUE}*                      {yybegin(ITEM_TYPE222); return CairoTokens.TYPE;}
-    "::"                                                {yybegin(ITEM_TYPE222); return CairoTokens.DOUBLE_COLON;}
-//    "<"                          {yybegin(GENERIC_PARAM_STATE); call_generic_type = CallGenericType.ITEM_TYPE;generic_para_depth = 0; return CairoTokens.LESS_THAN;}
-    '\n'                                            {yybegin(ITEM_TYPE222);}
 
-      ","             {
-          yybegin(STATE_STRUCT_FIELD);
-            return CairoTokens.COMMA;
-        }
-.                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
-}
 
 <ITEM_TYPE> {
     {WHITE_SPACE}+                                  { yybegin(ITEM_TYPE); return TokenType.WHITE_SPACE; }
     "of"                                            { yybegin(ITEM_TYPE); return CairoTokens.KW_OF; }
     "nopanic"                                         { yybegin(FN_RETURN_DECL_TYPE); return CairoTokens.KW_NOPANIC; }
     "@"*{XID_START}{XID_CONTINUE}*                      {yybegin(ITEM_TYPE); return CairoTokens.TYPE;}
+    "@"                                             { yybegin(ITEM_TYPE); return CairoTokens.AT; }
     ","
     {
-          if (call_item_type == CallItemType.FN_PARA) {
+          if (item_type_parenthesis_depth > 0) {
+              yybegin(ITEM_TYPE);
+          }
+          else if (call_item_type == CallItemType.FN_PARA) {
             yybegin(FN_DECL_PARA);
         }
         else if (call_item_type == CallItemType.FN_RETURN) {
@@ -361,6 +351,8 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
         }
         else if (call_item_type == CallItemType.IMPL_FIRST) {
             yybegin(IMPL_DECL);
+        } else {
+            yybegin(YYINITIAL);
         }
 
           return CairoTokens.COMMA;
@@ -370,14 +362,26 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
     '\n'                                            {yybegin(ITEM_TYPE);}
     ")"
     {
-          if (call_item_type == CallItemType.FN_PARA) {
+          if (item_type_parenthesis_depth > 0) {
+            item_type_parenthesis_depth -= 1;
+            yybegin(ITEM_TYPE);
+          }
+          else if (call_item_type == CallItemType.FN_PARA) {
               yybegin(FN_DECL_PARA);
+              zzMarkedPos = zzMarkedPos - 1;
+              zzStartRead -= 1;
           }
           else if (call_item_type == CallItemType.FN_RETURN) {
               yybegin(FN_RETURN_DECL_TYPE);
+              zzMarkedPos = zzMarkedPos - 1;
+                zzStartRead -= 1;
+          } else {
+            yybegin(YYINITIAL);
+            zzMarkedPos = zzMarkedPos - 1;
+            zzStartRead -= 1;
           }
-          zzMarkedPos = zzMarkedPos - 1;
-          zzStartRead -= 1;
+
+          return CairoTokens.CLOSE_PAREN;
       }
     "{"
     {
@@ -394,7 +398,16 @@ HEX_LIT = "0x" [a-fA-F0-9_]+ {INT_SUFFIX}?
           }
           else if (call_item_type == CallItemType.IMPL_FIRST) {
                   yybegin(IMPL_DECL);
-          }
+          } else {
+                yybegin(YYINITIAL);
+            }
+          return CairoTokens.OPEN_BRACE;
+      }
+      "("
+      {
+        item_type_parenthesis_depth += 1;
+        yybegin(ITEM_TYPE);
+        return CairoTokens.OPEN_PAREN;
       }
     .                                               {zzMarkedPos = zzMarkedPos - 1; zzStartRead -= 1; yybegin(YYINITIAL);}
 }
